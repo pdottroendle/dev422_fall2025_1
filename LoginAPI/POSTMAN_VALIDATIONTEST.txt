@@ -1,0 +1,55 @@
+Step-by-Step: Test Login with Postman
+ 1. Start Your API
+Make sure your API is running:
+Shelldotnet runShow more lines
+You should see something like:
+Now listening on: https://localhost:7107
+
+
+2. Open Postman
+If you don’t have Postman installed, you can download it from https://www.postman.com/downloads/
+
+ 3. Register a User (if not already registered)
+
+Method: POST
+URL: https://localhost:7107/api/auth/register
+Headers:
+
+Content-Type: application/json
+
+
+Body (raw JSON):
+
+JSON{  "username": "johndoe",  "password": "SecurePass123!",  "email": "john@example.com",  "firstName": "John",  "lastName": "Doe",  "role": "Patient"}Show more lines
+Click Send. You should get a 200 OK with a message like "Registration successful."
+
+ 4. Login to Get JWT Token
+
+Method: POST
+URL: https://localhost:7107/api/auth/login
+Headers:
+
+Content-Type: application/json
+
+
+Body (raw JSON):
+
+JSON{  "username": "johndoe",  "password": "SecurePass123!"}Show more lines
+Click Send. You should get a response like:
+JSON{  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}Show more lines
+Copy the token — you’ll use it to access protected endpoints.
+
+ 5. Use the Token to Access Protected Endpoints
+For example, to book an appointment:
+
+Method: POST
+URL: https://localhost:7107/api/appointment/book
+Headers:
+
+Content-Type: application/json
+Authorization: Bearer <paste-your-token-here>
+
+
+Body:
+
+JSON{  "doctorUsername": "drsmith",  "appointmentDate": "2025-11-10T14:00:00Z",  "reason": "Routine check-up"}Show more lines

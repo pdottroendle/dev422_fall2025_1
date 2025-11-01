@@ -1,0 +1,54 @@
+DEV422 PP TROENDLE FALL 2025 Software Developpment
+
+Note Ill ignore warnings are about nullable reference types
+Adding ? to make properties nullable (
+>>public string? Username { get; set; })
+Ill not do it as its not a production run, but an assignement hope its ok with Mr. Rizzi
+
+From the Login.zip we made in class
+
+redone the project .sln
+>dotnet new sln -n LoginAPI --force
+>dotnet sln add LoginAPI/LoginAPI.csproj
+
+JWT Authentication: Implemented in Program.cs and AuthController.cs.
+User Registration and Login: Working with in-memory storage and password hashing.
+Protected Endpoint Example: ProtectedDataController with [Authorize] attribute.
+
+
+Needed to add in accordance to Instructor Rizi's comments on my past assignments:
+____________________________________________________________________________________
+
+Create interfaces like IUserService, IAppointmentService, and ICommand.
+Implement these interfaces in concrete classes and inject them via dependency injection.
+Avoid hard-coded user storage (_users list) and instead use a service or repository pattern.
+
+Input Validation and Error Handling: Use [Required], [EmailAddress], etc., in your DTOs (RegisterRequest, UserLogin) for model validation.
+Add ModelState.IsValid checks in your controller actions.
+Return consistent error responses using ProblemDetails or custom error models.
+
+Add a Role property to the User model. Include the role in the JWT claims.
+Use [Authorize(Roles = "Admin")], [Authorize(Roles = "Doctor")], etc., on relevant endpoints.
+
+Create models: Appointment, AppointmentStatus (enum), etc.
+
+Create endpoints for: 
+_____________________
+
+>>Patients: Book, view, cancel their appointments.
+>>Doctors: View and update status of their appointments.
+>>Admins: View and manage all appointments.
+
+Add endpoints for:
+
+>>Viewing and updating user profile.
+>>Changing password (with current password verification).
+
+
+
+Update the README with a walkthrough as is done in unit tests for:
+_______________________________________________________________
+
+Registration and login logic.
+Appointment creation and status updates.
+Role-based access control.

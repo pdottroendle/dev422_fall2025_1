@@ -1,0 +1,6 @@
+@LoginAPI_HostAddress = http://localhost:5051
+
+GET {{LoginAPI_HostAddress}}/hospitalmanagement/
+Accept: application/json
+
+###
