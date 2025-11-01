@@ -163,3 +163,4 @@ C:\Node\GitPort\dev422_fall2025_1\LoginAPI\obj\Debug\net8.0\staticwebassets.buil
 C:\Node\GitPort\dev422_fall2025_1\LoginAPI\obj\Debug\net8.0\LoginAPI.csproj.Up2Date
 C:\Node\GitPort\dev422_fall2025_1\LoginAPI\obj\Debug\net8.0\LoginAPI.genruntimeconfig.cache
 C:\Node\GitPort\dev422_fall2025_1\LoginAPI\obj\Debug\net8.0\ref\LoginAPI.dll
+C:\Node\GitPort\dev422_fall2025_1\LoginAPI\obj\Debug\net8.0\LoginAPI.sourcelink.json

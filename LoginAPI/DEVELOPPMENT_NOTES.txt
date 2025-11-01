@@ -1,11 +1,24 @@
 DEV422 PP TROENDLE FALL 2025 Software Developpment
 
-Note Ill ignore warnings are about nullable reference types
+Note 
+
+--ignoring warnings are about nullable reference types
 Adding ? to make properties nullable (
 >>public string? Username { get; set; })
 Ill not do it as its not a production run, but an assignement hope its ok with Mr. Rizzi
 
-From the Login.zip we made in class
+--Left the old name LoginAPI because its about secure Login more generally
+
+--added to Git 
+  783  git status
+  784  git init
+  785  git remote add origin https://github.com/pdottroendle/dev422_fall2025_1
+  786  git add .
+  787  git commit -m "Initial commit of LoginAPI project"
+  788  git push -u origin master
+  789  git history 
+
+--From the Login.zip we made in class
 
 redone the project .sln
 >dotnet new sln -n LoginAPI --force
