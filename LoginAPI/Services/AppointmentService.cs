@@ -1,5 +1,7 @@
-using HealthcareAppointmentsAPI.Models;
 using HealthcareAppointmentsAPI.Interfaces;
+using HealthcareAppointmentsAPI.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HealthcareAppointmentsAPI.Services
 {
@@ -11,7 +13,6 @@ namespace HealthcareAppointmentsAPI.Services
         public Appointment Create(Appointment appointment)
         {
             appointment.Id = _nextId++;
-            appointment.Status = AppointmentStatus.Pending;
             _appointments.Add(appointment);
             return appointment;
         }
@@ -26,13 +27,23 @@ namespace HealthcareAppointmentsAPI.Services
             return _appointments;
         }
 
-        public bool UpdateStatus(int id, string status)
+        public bool UpdateStatus(int id, AppointmentStatus status)
         {
             var appointment = _appointments.FirstOrDefault(a => a.Id == id);
-            if (appointment == null) return false;
-            if (Enum.TryParse(status, out AppointmentStatus newStatus))
+            if (appointment != null)
             {
-                appointment.Status = newStatus;
+                appointment.Status = status;
+                return true;
+            }
+            return false;
+        }
+
+        public bool Delete(int id)
+        {
+            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
+            if (appointment != null)
+            {
+                _appointments.Remove(appointment);
                 return true;
             }
             return false;

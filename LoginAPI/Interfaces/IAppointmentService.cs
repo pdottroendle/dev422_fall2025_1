@@ -1,4 +1,5 @@
 using HealthcareAppointmentsAPI.Models;
+using System.Collections.Generic;
 
 namespace HealthcareAppointmentsAPI.Interfaces
 {
@@ -7,6 +8,7 @@ namespace HealthcareAppointmentsAPI.Interfaces
         Appointment Create(Appointment appointment);
         List<Appointment> GetAppointmentsByUser(string username);
         List<Appointment> GetAllAppointments();
-        bool UpdateStatus(int id, string status);
+        bool UpdateStatus(int id, AppointmentStatus status);
+        bool Delete(int id);
     }
 }
