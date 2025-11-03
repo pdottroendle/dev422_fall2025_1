@@ -1,29 +1,26 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 
-[HttpPost("login")]
-public IActionResult Login([FromBody] UserLogin login)
+namespace LoginAPI.Controllers
 {
-    var user = _userService.Authenticate(login.Username, login.Password);
-    if (user == null) return Unauthorized();
-
-    var claims = new[]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Role, user.Role) // Critical for role-based auth
-    };
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            if (request.Username == "admin" && request.Password == "password")
+            {
+                return Ok(new { Token = "fake-jwt-token" });
+            }
 
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            return Unauthorized();
+        }
+    }
 
-    var token = new JwtSecurityToken(
-        claims: claims,
-        expires: DateTime.Now.AddHours(1),
-        signingCredentials: creds
-    );
-
-    return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+    public class LoginRequest
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
 }
