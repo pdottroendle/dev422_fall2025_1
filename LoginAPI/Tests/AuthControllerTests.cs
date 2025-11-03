@@ -1,52 +1,45 @@
 using Xunit;
+using LoginAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using HealthcareAppointmentsAPI.Controllers;
-using HealthcareAppointmentsAPI.Models;
-using HealthcareAppointmentsAPI.Services;
-using HealthcareAppointmentsAPI.Interfaces;
-using System.Collections.Generic;
 
-public class AuthControllerTests
+namespace LoginAPI.Tests
 {
-    private readonly AuthController _controller;
-
-    public AuthControllerTests()
+    public class AuthControllerTests
     {
-        var inMemorySettings = new Dictionary<string, string> {
-            {"Jwt:SecretKey", "supersecretkey1234567890"}
-        };
-        IConfiguration configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings)
-            .Build();
+        [Fact]
+        public void Login_WithValidCredentials_ReturnsOkResult()
+        {
+            // Arrange
+            var controller = new AuthController();
+            var request = new LoginRequest
+            {
+                Username = "admin",
+                Password = "password"
+            };
 
-        IUserService userService = new UserService();
-        _controller = new AuthController(userService, configuration);
-    }
+            // Act
+            var result = controller.Login(request);
 
-    [Fact]
-    public void Register_WithValidUser_ReturnsOk()
-    {
-        var result = _controller.Register(new User {
-            Username = "testuser",
-            Password = "password123",
-            Email = "test@example.com",
-            FirstName = "Test",
-            LastName = "User",
-            Role = "Patient"
-        });
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
 
-        Assert.IsType<OkObjectResult>(result);
-    }
+        [Fact]
+        public void Login_WithInvalidCredentials_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var controller = new AuthController();
+            var request = new LoginRequest
+            {
+                Username = "user",
+                Password = "wrong"
+            };
 
-    [Fact]
-    public void Login_WithInvalidUser_ReturnsUnauthorized()
-    {
-        var result = _controller.Login(new UserLogin {
-            Username = "nonexistent",
-            Password = "wrongpass"
-        });
+            // Act
+            var result = controller.Login(request);
 
-        Assert.IsType<UnauthorizedObjectResult>(result);
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
     }
 }
