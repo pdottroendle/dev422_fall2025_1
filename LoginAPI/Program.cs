@@ -1,17 +1,37 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Security.Claims;
+using LoginAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ✅ Add JWT key to configuration
+builder.Configuration["Jwt:Key"] = "your-super-secret-key"; // Replace with a secure key
+
+// Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// JWT Authentication setup
-var key = Encoding.UTF8.GetBytes("your-super-secret-key"); // Replace with your actual key
+// ✅ In-memory user store with Admin seed
+var users = new List<User>
+{
+    new User
+    {
+        Username = "admin1",
+        Password = "StrongPass456!", // In production, hash this!
+        Email = "admin@example.com",
+        FirstName = "System",
+        LastName = "Admin",
+        Role = "Admin"
+    }
+};
+
+// Register the user store as a singleton
+builder.Services.AddSingleton(users);
+
+// ✅ JWT Authentication setup
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -32,15 +52,16 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-   app.UseHttpsRedirection();
+    app.UseSwaggerUI();
+}
 
-app.UseAuthentication();
+appAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();}
+app.Run();
