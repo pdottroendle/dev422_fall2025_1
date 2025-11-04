@@ -3,9 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using LoginAPI.Models;
+using HealthcareAppointmentsAPI.Models;
 
-namespace LoginAPI.Controllers
+namespace HealthcareAppointmentsAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -20,24 +20,19 @@ namespace LoginAPI.Controllers
             _config = config;
         }
 
-        // POST: api/auth/register
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegisterDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
-            {
                 return BadRequest(new { message = "Username and password are required." });
-            }
 
             if (_users.Any(u => u.Username == dto.Username))
-            {
                 return Conflict(new { message = "User already exists." });
-            }
 
             var newUser = new User
             {
                 Username = dto.Username,
-                Password = dto.Password, // In production, hash this!
+                Password = dto.Password,
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -48,7 +43,6 @@ namespace LoginAPI.Controllers
             return Ok(new { message = $"User {dto.Username} registered successfully as {dto.Role}" });
         }
 
-        // POST: api/auth/login
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest dto)
         {
@@ -82,19 +76,19 @@ namespace LoginAPI.Controllers
         }
     }
 
-    public class UserRegisterDto
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Role { get; set; }
-    }
+public class UserRegisterDto
+{
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+    public required string Email { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required string Role { get; set; }
+}
 
-    public class LoginRequest
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
+public class LoginRequest
+{
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+}
 }

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using LoginAPI.Models;
+using HealthcareAppointmentsAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,9 +59,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-appAuthentication();
+app.UseHttpsRedirection();
+app.UseAuthentication(); // ✅ Fixed typo
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

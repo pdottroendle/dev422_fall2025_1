@@ -1,8 +1,8 @@
 using Xunit;
-using LoginAPI.Controllers;
+using HealthcareAppointmentsAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LoginAPI.Tests
+namespace HealthcareAppointmentsAPI.Tests
 {
     public class AuthControllerTests
     {

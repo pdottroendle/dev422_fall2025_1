@@ -1,49 +1,49 @@
 using Xunit;
-using Moq;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using HealthcareAppointmentsAPI.Controllers;
-using HealthcareAppointmentsAPI.Interfaces;
 using HealthcareAppointmentsAPI.Models;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
-public class AppointmentControllerTests
+public class AuthControllerTests
 {
-    private readonly AppointmentController _controller;
-    private readonly Mock<IAppointmentService> _mockService;
+    private readonly AuthController _controller;
+    private readonly List<User> _users;
+    private readonly IConfiguration _config;
 
-    public AppointmentControllerTests()
+    public AuthControllerTests()
     {
-        _mockService = new Mock<IAppointmentService>();
-        _controller = new AppointmentController(_mockService.Object);
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        _users = new List<User>();
+        _config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
         {
-            new Claim(ClaimTypes.Name, "testuser"),
-            new Claim(ClaimTypes.Role, "Patient")
-        }, "mock"));
+            { "Jwt:Key", "test-secret-key" }
+        }).Build();
 
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        _controller = new AuthController(_users, _config);
     }
 
     [Fact]
-    public void BookAppointment_ReturnsOk()
+    public void Register_AddsUser_ReturnsOk()
     {
-        var appointment = new Appointment
+        var dto = new UserRegisterDto
         {
-            DoctorUsername = "doctor1",
-            AppointmentDate = System.DateTime.Now.AddDays(1),
-            Reason = "Checkup"
+            Username = "testuser",
+            Password = "password",
+            Email = "test@example.com",
+            FirstName = "Test",
+            LastName = "User",
+            Role = "Patient"
         };
 
-        _mockService.Setup(s => s.Create(It.IsAny<Appointment>())).Returns(appointment);
-
-        var result = _controller.BookAppointment(appointment);
-
+        var result = _controller.Register(dto);
         Assert.IsType<OkObjectResult>(result);
+    }
+
+    [Fact]
+    public void Login_InvalidCredentials_ReturnsUnauthorized()
+    {
+        var dto = new LoginRequest { Username = "wrong", Password = "wrong" };
+        var result = _controller.Login(dto);
+        Assert.IsType<UnauthorizedObjectResult>(result);
     }
 }
