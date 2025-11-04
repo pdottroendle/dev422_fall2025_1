@@ -6,16 +6,29 @@ namespace LoginAPI.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] UserRegisterDto dto)
         {
-            if (request.Username == "admin" && request.Password == "password")
-            {
-                return Ok(new { Token = "fake-jwt-token" });
-            }
-
-            return Unauthorized();
+            // Registration logic here
+            return Ok(new { message = "User registered successfully" });
         }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginRequest dto)
+        {
+            // Login logic here
+            return Ok(new { token = "fake-jwt-token" });
+        }
+    }
+
+    public class UserRegisterDto
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Role { get; set; }
     }
 
     public class LoginRequest
