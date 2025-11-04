@@ -19,7 +19,7 @@ var users = new List<User>
     new User
     {
         Username = "admin1",
-        Password = "StrongPass456!", // In production, hash this!
+        Password = BCrypt.Net.BCrypt.HashPassword("StrongPass456!"),
         Email = "admin@example.com",
         FirstName = "System",
         LastName = "Admin",
@@ -50,6 +50,15 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
+
 var app = builder.Build();
 
 // ✅ Configure middleware
@@ -60,6 +69,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication(); // ✅ Fixed typo
 app.UseAuthorization();
 

@@ -1,45 +1,52 @@
 using Xunit;
-using HealthcareAppointmentsAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using HealthcareAppointmentsAPI.Controllers;
+using HealthcareAppointmentsAPI.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace HealthcareAppointmentsAPI.Tests
 {
     public class AuthControllerTests
     {
-        [Fact]
-        public void Login_WithValidCredentials_ReturnsOkResult()
+        private readonly AuthController _controller;
+        private readonly List<User> _users;
+        private readonly IConfiguration _config;
+
+        public AuthControllerTests()
         {
-            // Arrange
-            var controller = new AuthController();
-            var request = new LoginRequest
+            _users = new List<User>();
+            _config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
             {
-                Username = "admin",
-                Password = "password"
+                { "Jwt:Key", "test-secret-key" }
+            }).Build();
+
+            _controller = new AuthController(_users, _config);
+        }
+
+        [Fact]
+        public void Register_AddsUser_ReturnsOk()
+        {
+            var dto = new UserRegisterDto
+            {
+                Username = "testuser",
+                Password = "password",
+                Email = "test@example.com",
+                FirstName = "Test",
+                LastName = "User",
+                Role = "Patient"
             };
 
-            // Act
-            var result = controller.Login(request);
-
-            // Assert
+            var result = _controller.Register(dto);
             Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
-        public void Login_WithInvalidCredentials_ReturnsUnauthorizedResult()
+        public void Login_InvalidCredentials_ReturnsUnauthorized()
         {
-            // Arrange
-            var controller = new AuthController();
-            var request = new LoginRequest
-            {
-                Username = "user",
-                Password = "wrong"
-            };
-
-            // Act
-            var result = controller.Login(request);
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result);
+            var dto = new LoginRequest { Username = "wrong", Password = "wrong" };
+            var result = _controller.Login(dto);
+            Assert.IsType<UnauthorizedObjectResult>(result);
         }
     }
 }
