@@ -1,49 +1,99 @@
 using Xunit;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using HealthcareAppointmentsAPI.Controllers;
 using HealthcareAppointmentsAPI.Models;
-using Microsoft.Extensions.Configuration;
+using HealthcareAppointmentsAPI.Services.Interfaces;
+using Moq;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
-public class AuthControllerTests
+namespace HealthcareAppointmentsAPI.Tests
 {
-    private readonly AuthController _controller;
-    private readonly List<User> _users;
-    private readonly IConfiguration _config;
-
-    public AuthControllerTests()
+    public class AppointmentControllerTests
     {
-        _users = new List<User>();
-        _config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+        [Fact]
+        public void GetAppointmentsByUsername_ReturnsAppointmentsForUser()
         {
-            { "Jwt:Key", "test-secret-key" }
-        }).Build();
+            // Arrange
+            var mockService = new Mock<IAppointmentService>();
+            mockService.Setup(s => s.GetAppointmentsByUser("patient1"))
+                       .Returns(new List<Appointment>
+                       {
+                           new Appointment
+                           {
+                               Id = 1,
+                               PatientUsername = "patient1",
+                               DoctorUsername = "doctor1",
+                               Status = AppointmentStatus.Confirmed
+                           }
+                       });
 
-        _controller = new AuthController(_users, _config);
-    }
+            var controller = new AppointmentController(mockService.Object);
 
-    [Fact]
-    public void Register_AddsUser_ReturnsOk()
-    {
-        var dto = new UserRegisterDto
+            // Act
+            var result = controller.GetAppointmentsByUsername("patient1") as OkObjectResult;
+
+            // Assert
+            Assert.NotNull(result);
+            var appointments = Assert.IsType<List<Appointment>>(result.Value);
+            Assert.Single(appointments);
+            Assert.Equal("patient1", appointments[0].PatientUsername);
+        }
+
+        [Fact]
+        public void GetAllAppointments_ReturnsAllAppointments()
         {
-            Username = "testuser",
-            Password = "password",
-            Email = "test@example.com",
-            FirstName = "Test",
-            LastName = "User",
-            Role = "Patient"
-        };
+            // Arrange
+            var mockService = new Mock<IAppointmentService>();
+            mockService.Setup(s => s.GetAllAppointments())
+                       .Returns(new List<Appointment>
+                       {
+                           new Appointment { Id = 1, PatientUsername = "patient1" },
+                           new Appointment { Id = 2, PatientUsername = "patient2" }
+                       });
 
-        var result = _controller.Register(dto);
-        Assert.IsType<OkObjectResult>(result);
-    }
+            var controller = new AppointmentController(mockService.Object);
 
-    [Fact]
-    public void Login_InvalidCredentials_ReturnsUnauthorized()
-    {
-        var dto = new LoginRequest { Username = "wrong", Password = "wrong" };
-        var result = _controller.Login(dto);
-        Assert.IsType<UnauthorizedObjectResult>(result);
+            // Act
+            var result = controller.GetAllAppointments() as OkObjectResult;
+
+            // Assert
+            Assert.NotNull(result);
+            var appointments = Assert.IsType<List<Appointment>>(result.Value);
+            Assert.Equal(2, appointments.Count);
+        }
+
+        [Fact]
+        public void UpdateStatus_ReturnsOk_WhenSuccessful()
+        {
+            // Arrange
+            var mockService = new Mock<IAppointmentService>();
+            mockService.Setup(s => s.UpdateStatus(1, AppointmentStatus.Confirmed)).Returns(true);
+
+            var controller = new AppointmentController(mockService.Object);
+
+            // Act
+            var result = controller.UpdateStatus(1, AppointmentStatus.Confirmed) as OkObjectResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("Status updated.", ((dynamic)result.Value).Message);
+        }
+
+        [Fact]
+        public void DeleteAppointment_ReturnsOk_WhenSuccessful()
+        {
+            // Arrange
+            var mockService = new Mock<IAppointmentService>();
+            mockService.Setup(s => s.Delete(1)).Returns(true);
+
+            var controller = new AppointmentController(mockService.Object);
+
+            // Act
+            var result = controller.DeleteAppointment(1) as OkObjectResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("Appointment deleted.", ((dynamic)result.Value).Message);
+        }
     }
 }

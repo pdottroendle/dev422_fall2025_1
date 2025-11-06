@@ -2,16 +2,16 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using HealthcareAppointmentsAPI.Models;
+using HealthcareAppointmentsAPI.Services;
+using HealthcareAppointmentsAPI.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using BCrypt.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Add JWT key to configuration
-builder.Configuration["Jwt:Key"] = "your-super-secret-key"; // Replace with a secure key
-
-// Add services
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// ✅ Get JWT key after builder is declared
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]);
 
 // ✅ In-memory user store with Admin seed
 var users = new List<User>
@@ -27,12 +27,16 @@ var users = new List<User>
     }
 };
 
-// Register the user store as a singleton
+// ✅ Register services
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseInMemoryDatabase("HealthcareDB")); // For testing
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(users);
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
-// ✅ JWT Authentication setup
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-
+// ✅ Configure JWT Authentication with RoleClaimType
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -46,10 +50,12 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        RoleClaimType = ClaimTypes.Role // ✅ Critical for role-based authorization
     };
 });
 
+// ✅ Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -58,19 +64,17 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-
 var app = builder.Build();
 
-// ✅ Configure middleware
+// ✅ Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-app.UseAuthentication(); // ✅ Fixed typo
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

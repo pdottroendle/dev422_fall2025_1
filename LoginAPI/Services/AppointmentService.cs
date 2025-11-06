@@ -1,52 +1,57 @@
-using HealthcareAppointmentsAPI.Interfaces;
+//using HealthcareAppointmentsAPI.Interfaces;
+using HealthcareAppointmentsAPI.Services.Interfaces;
 using HealthcareAppointmentsAPI.Models;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HealthcareAppointmentsAPI.Services
 {
-    public class AppointmentService : IAppointmentService
+  using HealthcareAppointmentsAPI.Models;
+
+  public class AppointmentService : IAppointmentService
+  {
+    private readonly ApplicationDbContext _context;
+
+    public AppointmentService(ApplicationDbContext context)
     {
-        private readonly List<Appointment> _appointments = new();
-        private int _nextId = 1;
-
-        public Appointment Create(Appointment appointment)
-        {
-            appointment.Id = _nextId++;
-            _appointments.Add(appointment);
-            return appointment;
-        }
-
-        public List<Appointment> GetAppointmentsByUser(string username)
-        {
-            return _appointments.Where(a => a.PatientUsername == username || a.DoctorUsername == username).ToList();
-        }
-
-        public List<Appointment> GetAllAppointments()
-        {
-            return _appointments;
-        }
-
-        public bool UpdateStatus(int id, AppointmentStatus status)
-        {
-            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
-            if (appointment != null)
-            {
-                appointment.Status = status;
-                return true;
-            }
-            return false;
-        }
-
-        public bool Delete(int id)
-        {
-            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
-            if (appointment != null)
-            {
-                _appointments.Remove(appointment);
-                return true;
-            }
-            return false;
-        }
+        _context = context;
     }
+
+    public Appointment Create(Appointment appointment)
+    {
+        _context.Appointments.Add(appointment);
+        _context.SaveChanges();
+        return appointment;
+    }
+
+    public List<Appointment> GetAppointmentsByUser(string username)
+    {
+        return _context.Appointments
+            .Where(a => a.PatientUsername == username || a.DoctorUsername == username)
+            .ToList();
+    }
+
+    public List<Appointment> GetAllAppointments()
+    {
+        return _context.Appointments.ToList();
+    }
+
+    public bool UpdateStatus(int id, AppointmentStatus status)
+    {
+        var appointment = _context.Appointments.Find(id);
+        if (appointment == null) return false;
+        appointment.Status = status;
+        _context.SaveChanges();
+        return true;
+    }
+
+    public bool Delete(int id)
+    {
+        var appointment = _context.Appointments.Find(id);
+        if (appointment == null) return false;
+        _context.Appointments.Remove(appointment);
+        _context.SaveChanges();
+        return true;
+    }
+  }   
 }

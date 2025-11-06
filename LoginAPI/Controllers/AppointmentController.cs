@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HealthcareAppointmentsAPI.Models;
-using HealthcareAppointmentsAPI.Interfaces;
+//using HealthcareAppointmentsAPI.Interfaces;
+using HealthcareAppointmentsAPI.Services.Interfaces;
 
 namespace HealthcareAppointmentsAPI.Controllers
 {
@@ -39,6 +40,16 @@ public IActionResult GetMyAppointments()
 public IActionResult GetAllAppointments()
 {
     return Ok(_appointmentService.GetAllAppointments());
+}
+
+[HttpGet("Appointment/{username}")]
+public IActionResult GetAppointmentsByUsername(string username)
+{
+    //var appointments = _context.Appointments
+     //   .Where(a => a.PatientUsername == username) //  Use PatientUsername
+     //   .ToList();
+    var appointments = _appointmentService.GetAppointmentsByUser(username);
+	return Ok(appointments);
 }
 
 [Authorize(Roles = "Doctor,Admin")]

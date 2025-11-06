@@ -53,5 +53,28 @@ namespace HealthcareAppointmentsAPI.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+		[HttpPost("register")]
+public IActionResult Register([FromBody] UserRegisterDto newUser)
+{
+    if (_users.Any(u => u.Username == newUser.Username))
+    {
+        return BadRequest("Username already exists.");
+    }
+
+    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
+
+    var user = new User
+    {
+        Username = newUser.Username,
+        Password = hashedPassword,
+        Email = newUser.Email,
+        FirstName = newUser.FirstName,
+        LastName = newUser.LastName,
+        Role = newUser.Role
+    };
+
+    _users.Add(user);
+    return Ok("User registered successfully.");
+}
     }
 }
